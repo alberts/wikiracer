@@ -10,7 +10,7 @@ You need to install Java. Feel free to download the latest JDK from [here](http:
 
 Run the uberjar:
 
-    $ java -jar target/wikiracer-standalone.jar
+    $ java -jar wikiracer-standalone.jar
 
 ## Approach
 
