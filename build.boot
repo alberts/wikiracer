@@ -3,8 +3,7 @@
 
 (set-env! :resource-paths #{"resources"}
           :source-paths   #{"src"}
-          :dependencies   '[;; Needed?
-                            [environ"1.0.3"]
+          :dependencies   '[[environ"1.0.3"]
                             [boot-environ "1.0.3"]
                             [cheshire "5.7.1"]
                             [clj-http "2.3.0"]
