@@ -14,28 +14,29 @@ Run the uberjar:
 
 ## Approach
 
-I decided to use the [WikiMedia API](https://www.mediawiki.org/wiki/API:Query) to traverse links to other articles. I went through several approaches leveraging the API, with varying success.
+I decided to use the [WikiMedia API](https://www.mediawiki.org/wiki/API:Query) to traverse the Wikipedia article graph. I went through several approaches leveraging the API, with varying success.
 
 
-### Brute Force BFS
+### Attempt One: Brute Force BFS
 In this approach I used a simple BFS approach with no parallelism.
-I used a set to represent the pages that had already been visited. Whenever a request came back with neighbor links to explore, already visited links were filtered. The remaining links were then added to a queue to query on the next cycle.
+I used a Set to represent the pages that had already been visited. Whenever a request came back with neighbor links to explore, the already visited links were filtered. The remaining links were then added to a queue to query on the next cycle.
 
-The program would terminate immediately if the destination link was found among a set of neighbors. The program woudld also terminate after a max depth is reached, if not link can be found by then.
+The program would terminate immediately if the destination link was found among a list of neighbors. The program woudld also terminate after a max depth is reached, if no link can be found by then.
 
 ### Attempt Two: Parallel BFS
 In this approach, I spun up N threads to make the requests using [claypoole](https://github.com/TheClimateCorporation/claypoole).
-Whenever a thread would return a result, its results were added to a lazy sequence to compute for the next BFS cycle.
+Whenever a thread would return a result, the results were added to a lazy sequence to compute for the next BFS cycle.
 
-This approach would have been ideal if it worked as the threadpool minimized the effect of the Network I/O. Unfortunately, the WikiMedia API rate limits the requests and start rejecting them at even a modest thread count.
+This approach would have been ideal as the threadpool minimized the effect of the Network I/O. Unfortunately, the WikiMedia API rate limits the requests and starts rejecting them at even a modest thread count.
 
 I also tried using a [generator](https://www.mediawiki.org/wiki/API:Query#Generators) that could query two levels of neighbors at a time, but this call was very expensive. It also became harder to keep track of the current path when looking two levels ahead, and the rate limits persisted. So I bailed on this approach.
 
-### Attempt Three (final): Laziness
+### Attempt Three (final): Lazy BFS :sleeping:
 
-I decided to only partially compute each of the BFS computations for each level, in the chance the some sources->destinations had many paths.
+I decided to only partially compute each of the BFS computations for each level, in the chance that many paths existed from source to destination. 
+At each level, we compute some of the neighbors. Then we proceed to the max depth. If nothing has been found we backtrack and evaluate more computations in chunks.
 
-This seemed to work really well for those cases.
+This seemed to work really well for cases with alot of paths from source to target.
 
 ```clojure
 
@@ -74,10 +75,10 @@ I used [atoms](https://clojure.org/reference/atoms) to represent my state, with 
 Leveraging a database like Redis would help the algorithm scale to larger depths.
 
 ### Download Wikipedia
-One large upfront cost would allow for many fast computations to run on a local database.
+One large upfront cost would allow many fast computations to run on a local database.
 
 ### A*
 Use heuristics to pick which nodes to visit next, rather than guessing blindly.
 
 ### Randomize lazy evaluating
-Currently the lazy evaluation takes advantages of paths where the links are earlier on in the list. Using randomness would better take advantage of highly connected nodes.
+Using randomness could perhaps take better advantage of highly connected nodes. Currently Wikipedia returns links in alphabetical order, and that is the evaluation order so far.
