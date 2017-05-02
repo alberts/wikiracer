@@ -32,10 +32,10 @@
           {:keys [source
                   destination
                   depth]} (parse-inputs source destination depth)
-          _               (search-for-path source destination depth)])
+
+          _ (search-for-path source destination depth)])
     (recur)))
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
   (user-input))

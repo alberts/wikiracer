@@ -7,9 +7,3 @@
 (comment
   (impl/search-for-path "2017 London Marathon" "Washington, D.C." 6)
   (impl/search-for-path "Grand National Trial" "Mike Tyson" 6))
-
-
-
-
-
-
